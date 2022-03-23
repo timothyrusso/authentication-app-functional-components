@@ -1,70 +1,75 @@
-import React from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import * as auth from '../auth.js';
 import './styles/Login.css';
 
-class Login extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      username: '',
-      password: ''
-    }
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+const Login = ({ handleLogin }) => {
 
-  handleChange(e) {
+  const [inputs, setInputs] = useState({
+    username: '',
+    password: ''
+  });
+  const [message, setMessage] = useState("");
+
+  const history = useHistory();
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    this.setState({
-      [name]: value
-    });
+    setInputs((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }))
   }
 
-  handleSubmit(e) {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!this.state.username || !this.state.password) {
+    if (!inputs.username || !inputs.password) {
       return;
     }
-    auth.authorize(this.state.username, this.state.password)
+    auth.authorize(inputs.username, inputs.password)
       .then((data) => {
         if (data.jwt) {
-          this.setState({ email: '', password: '' }, () => {
-            this.props.handleLogin(data.user.en_cal_goal.calGoal);
-            this.props.history.push('/diary');
+          setInputs({
+            username: '',
+            password: ''
           })
+          handleLogin(data.user.en_cal_goal.calGoal);
+          history.push('/diary');
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        setMessage("Something went wrong, please try again.")
+      });
+
   }
 
-  render() {
-    return (
-      <div className="login">
-        <p className="login__welcome">
-          Welcome back!
-        </p>
-        <form onSubmit={this.handleSubmit} className="login__form">
-          <label htmlFor="username">
-            Username:
-          </label>
-          <input required id="username" name="username" type="text" value={this.state.username} onChange={this.handleChange} />
-          <label htmlFor="password">
-            Password:
-          </label>
-          <input required id="password" name="password" type="password" value={this.state.password} onChange={this.handleChange} />
-          <div className="login__button-container">
-            <button type="submit" onSubmit={this.handleSubmit} className="login__link">Log in</button>
-          </div>
-        </form>
-
-        <div className="login__signup">
-          <p>Ready to begin your journey?</p>
-          <Link to="/register" className="signup__link">Sign up</Link>
+  return (
+    <div className="login">
+      <p className="login__welcome">
+        Welcome back!
+      </p>
+      <form onSubmit={handleSubmit} className="login__form">
+        <label htmlFor="username">
+          Username:
+        </label>
+        <input required id="username" name="username" type="text" value={inputs.username} onChange={handleChange} />
+        <label htmlFor="password">
+          Password:
+        </label>
+        <input required id="password" name="password" type="password" value={inputs.password} onChange={handleChange} />
+        <div className="login__button-container">
+          <button type="submit" onSubmit={handleSubmit} className="login__link">Log in</button>
         </div>
+      </form>
+
+      <div className="login__signup">
+        <p>Ready to begin your journey?</p>
+        <Link to="/register" className="signup__link">Sign up</Link>
       </div>
-    )
-  }
+      <p>{message}</p>
+    </div>
+  )
 }
 
-export default withRouter(Login);
+export default Login;

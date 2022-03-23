@@ -43,9 +43,10 @@ const Register = () => {
           history.push('/login');
         } else {
           console.log('Something went wrong.');
-          setMessage("Something went wrong, please try again.")
+          setMessage("Something went wrong, please try again.");
         }
-      });
+      })
+        .catch((err) => console.log(err));
     }
   }
 
