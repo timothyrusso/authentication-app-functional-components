@@ -1,2 +1,2 @@
-# authentication-app-functional-components
-Simple authentication app with functional components
+# authentication-app
+Simple application with authentication functionality
